@@ -6,6 +6,14 @@
  * Author: Your Name
  */
 
+// Enqueue the style file
+function beonline_enqueue_styles() {
+    wp_enqueue_style('beonline-styles', plugin_dir_url(__FILE__) . 'style.css');
+}
+
+add_action('admin_enqueue_scripts', 'beonline_enqueue_styles');
+
+
 // Add menu to the admin dashboard
 function beonline_menu() {
     add_menu_page(
@@ -91,7 +99,7 @@ function beonline_page() {
         }
         ?>
         </select>
-        <input type="submit" value="Szűrés">
+        <input type="submit" value="Szűrés" class="bo-filter">
     </form>
 
     <!-- Display the saved data -->
