@@ -86,9 +86,9 @@ function beonline_page() {
     <!-- Display the saved data -->
     <h2 class="bo-finished">Elvégzett munkák</h2>
 
-    <!-- Display the filter form for year -->
+    <!-- Display the filter form for year and month -->
     <form id="filter-form" method="post" action="">
-        <label for="filter-year">Év szerinti szűrés:</label>
+        <label for="filter-year">Szűrés időszakra:</label>
         <select name="filter_year" id="filter-year">
             <?php
         // Get unique years from saved entries
@@ -101,12 +101,28 @@ function beonline_page() {
         }
         ?>
         </select>
+
+        <select name="filter_month" id="filter-month">
+            <?php
+        // Get unique months from saved entries
+        $months = array_unique(array_map(function ($entry) {
+            return date('m', strtotime($entry['date']));
+        }, get_beonline_data()));
+
+        foreach ($months as $month) {
+            $month_name = date("F", mktime(0, 0, 0, $month, 10));
+            echo "<option value=\"$month\">$month_name</option>";
+        }
+        ?>
+        </select>
+
         <input type="submit" value="Szűrés" class="bo-filter">
     </form>
 
+    <button class="bo-filter-delete" onclick="location.href='admin.php?page=beonline'" type="button">
+        Szűrők törlése</button>
+
     <!-- Display the saved data -->
-
-
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
@@ -120,7 +136,8 @@ function beonline_page() {
             <?php
                 // Retrieve and display saved data based on the filter
                 $filter_year = isset($_POST['filter_year']) ? $_POST['filter_year'] : null;
-                $saved_data = get_beonline_data($filter_year);
+                $filter_month = isset($_POST['filter_month']) ? $_POST['filter_month'] : null;
+                $saved_data = get_beonline_data($filter_year, $filter_month);
                 $total_hours = 0; // Initialize the total hours variable
 
                 foreach ($saved_data as $data) :
@@ -153,19 +170,26 @@ function beonline_page() {
 <?php
 }
 
-// Function to retrieve saved data from the database with optional year filter
-function get_beonline_data($filter_year = null) {
+// Function to retrieve saved data from the database with optional year and month filter
+function get_beonline_data($filter_year = null, $filter_month = null) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'beonline_tracker_entries';
 
-    // Add a WHERE clause for the year if it's specified
-    $where_clause = $filter_year ? "WHERE YEAR(date) = $filter_year" : '';
+    // Add a WHERE clause for the year and month if they're specified
+    $where_clause = '';
+    if ($filter_year) {
+        $where_clause .= " AND YEAR(date) = $filter_year";
+    }
+    if ($filter_month) {
+        $where_clause .= " AND MONTH(date) = $filter_month";
+    }
 
-    $query = "SELECT * FROM $table_name $where_clause ORDER BY date DESC";
+    $query = "SELECT * FROM $table_name WHERE 1=1 $where_clause ORDER BY date DESC";
     $saved_data = $wpdb->get_results($query, ARRAY_A);
 
     return $saved_data;
 }
+
 
 // Hook to save data when the form is submitted
 add_action('admin_post_save_beonline_data', 'save_beonline_data');
