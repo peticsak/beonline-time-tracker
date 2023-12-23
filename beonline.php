@@ -1,10 +1,11 @@
 <?php
 /**
- * Plugin Name: BeOnline
- * Description: A simple WordPress plugin with admin menu.
+ * Plugin Name: BeOnline Feladat Tracker
+ * Description: Egy plugin az elvégzett feladatok követésére.
  * Version: 1.0
- * Author: Your Name
+ * Author: <a href="https://beonline.cloud">BeOnline Technologies</a> | <a href="admin.php?page=beonline">Feladatok</a>
  */
+
 
 // Enqueue the style file
 function beonline_enqueue_styles() {
@@ -41,10 +42,6 @@ function beonline_menu() {
 function beonline_page() {
     ?>
 <style>
-.bo-form {
-    padding-bottom: 20px;
-}
-
 #filter-form {
     margin-top: 20px;
 }
@@ -59,7 +56,7 @@ function beonline_page() {
     <!-- Display a message if data is saved successfully -->
     <?php if (isset($_GET['message']) && $_GET['message'] == 1) : ?>
     <div class="updated notice is-dismissible">
-        <p>Data saved successfully!</p>
+        <p>Sikeres mentés!</p>
     </div>
     <?php endif; ?>
 
@@ -80,9 +77,14 @@ function beonline_page() {
         <?php endfor; ?>
 
         <?php wp_nonce_field('beonline_save_data', 'beonline_nonce'); ?>
-        <input type="hidden" name="action" value="save_beonline_data">
-        <?php submit_button('Mentés'); ?>
+        <input type="hidden" name="action" value="save_beonline_data" class="bo-save">
+        <div class="bo-button">
+            <?php submit_button('Mentés'); ?></div>
     </form>
+
+
+    <!-- Display the saved data -->
+    <h2 class="bo-finished">Elvégzett munkák</h2>
 
     <!-- Display the filter form for year -->
     <form id="filter-form" method="post" action="">
@@ -103,7 +105,8 @@ function beonline_page() {
     </form>
 
     <!-- Display the saved data -->
-    <h2>Saved Data</h2>
+
+
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
@@ -116,7 +119,8 @@ function beonline_page() {
         <tbody>
             <?php
                 // Retrieve and display saved data based on the filter
-                $saved_data = get_beonline_data($_POST['filter_year']);
+                $filter_year = isset($_POST['filter_year']) ? $_POST['filter_year'] : null;
+                $saved_data = get_beonline_data($filter_year);
                 $total_hours = 0; // Initialize the total hours variable
 
                 foreach ($saved_data as $data) :
@@ -146,14 +150,6 @@ function beonline_page() {
         </tfoot>
     </table>
 </div>
-<script>
-// Add datepicker script
-jQuery(document).ready(function($) {
-    $('.datepicker').datepicker({
-        dateFormat: 'yy-mm-dd'
-    });
-});
-</script>
 <?php
 }
 

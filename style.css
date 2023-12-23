@@ -1,0 +1,16 @@
+.bo-button .button-primary {
+  background: #eb5757 !important;
+  border: none;
+}
+
+.bo-filter {
+  background: #eb5757 !important;
+  border: none;
+  padding: 5px 15px;
+  color: white;
+  border-radius: 3px;
+}
+
+.bo-finished {
+  padding-top: 50px !important;
+}
